@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2026 가계부</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- 상단 -->
+    <header class="top">
+      <h1>2026 가계부</h1>
+      <!-- 제목 -->
+      <div class="period">
+        <!-- 날짜 + 화살표 -->
+        <button class="arrow">◀</button>
+        <span id="periodText">12.01 ~ 01.19</span>
+        <button class="arrow">▶</button>
+      </div>
+    </header>
+
+    <!-- 카드 리스트 -->
+    <main id="cardList">
+      <!-- 카드가 여기에 추가될 예정 -->
+    </main>
+
+    <!-- 상세 화면 -->
+    <section id="detail" class="hidden">
+      <header class="top">
+        <button id="backBtn" class="arrow">←</button>
+        <h1 id="detailTitle">카드 제목</h1>
+        <div class="card-summary detail-summary">
+          <span id="detailIncome">수입 0</span>
+          <span id="detailExpense">지출 0</span>
+          <span id="detailBalance">잔액 0</span>
+        </div>
+      </header>
+
+      <div class="detail-body">
+        <div class="detail-list">
+          <h3>수입 내역</h3>
+          <ul id="incomeList"></ul>
+
+          <h3>지출 내역</h3>
+          <ul id="expenseList"></ul>
+        </div>
+
+        <div class="input-box">
+          <h3>수입 추가</h3>
+          <input id="incomeText" placeholder="내용" />
+          <input id="incomeAmount" type="number" placeholder="금액" />
+          <button id="addIncome">추가</button>
+        </div>
+
+        <div class="input-box">
+          <h3>지출 추가</h3>
+          <input id="expenseText" placeholder="내용" />
+          <input id="expenseAmount" type="number" placeholder="금액" />
+          <button id="addExpense">추가</button>
+        </div>
+      </div>
+
+      <p style="text-align: center; color: #666">
+        다음 단계에서 수입 · 지출 입력
+      </p>
+    </section>
+
+    <!-- 플로팅 버튼 -->
+    <button id="addBtn" class="fab">+</button>
+
+    <script type="module" src="index.mjs"></script>
+  </body>
+</html>
