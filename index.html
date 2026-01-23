@@ -28,43 +28,46 @@
       <header class="top">
         <button id="backBtn" class="arrow">←</button>
         <h1 id="detailTitle">카드 제목</h1>
-        <div class="tab-header">
-          <button class="tab-btn active" data-tab="summary">총합계</button>
-          <button class="tab-btn" data-tab="income">수입</button>
-          <button class="tab-btn" data-tab="expense">지출</button>
+        <div class="detail-tabs">
+          <button class="tab active" data-tab="summary">총합계</button>
+          <button class="tab" data-tab="income">수입</button>
+          <button class="tab" data-tab="expense">지출</button>
         </div>
       </header>
 
       <div class="detail-body">
         <!-- 총합계 -->
-        <div id="summaryTab" class="tab-content">
-          <div class="summary-item">
-            총수입: <span id="detailIncome">0</span>
+        <div class="tab-content" id="summaryTab">
+          <div class="summary-box">
+            <p>총수입</p>
+            <h2 id="totalIncome">0</h2>
           </div>
-          <div class="summary-item">
-            총지출: <span id="detailExpense">0</span>
+          <div class="summary-box">
+            <p>총지출</p>
+            <h2 id="totalExpense">0</h2>
           </div>
-          <div class="summary-item">
-            잔액: <span id="detailBalance">0</span>
+          <div class="summary-box">
+            <p>잔액</p>
+            <h2 id="balance">0</h2>
           </div>
         </div>
 
         <!-- 수입 -->
-        <div id="incomeTab" class="tab-content hidden">
-          <ul id="incomeList"></ul>
+        <div class="tab-content hidden" id="incomeTab">
+          <div id="incomeList"></div>
           <div class="input-box">
-            <input id="incomeText" placeholder="내용" />
-            <input id="incomeAmount" placeholder="금액" type="number" />
+            <input id="incomeTitle" placeholder="수입 항목" />
+            <input id="incomeAmount" type="number" placeholder="금액" />
             <button id="addIncome">추가</button>
           </div>
         </div>
 
         <!-- 지출 -->
-        <div id="expenseTab" class="tab-content hidden">
-          <ul id="expenseList"></ul>
+        <div class="tab-content hidden" id="expenseTab">
+          <div id="expenseList"></div>
           <div class="input-box">
-            <input id="expenseText" placeholder="내용" />
-            <input id="expenseAmount" placeholder="금액" type="number" />
+            <input id="expenseTitle" placeholder="지출 항목" />
+            <input id="expenseAmount" type="number" placeholder="금액" />
             <button id="addExpense">추가</button>
           </div>
         </div>
@@ -78,3 +81,4 @@
     <script type="module" src="index.mjs"></script>
   </body>
 </html>
+
