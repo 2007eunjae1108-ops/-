@@ -39,25 +39,39 @@ const saved = localStorage.getItem("periods");
 if (saved) periods = JSON.parse(saved);
 else periods = [{ start: "12.01", end: "01.19", cards: [] }];
 
+// 저장
 function saveData() {
   localStorage.setItem("periods", JSON.stringify(periods));
 }
 
+// 현재 기간 불러오기
 function loadPeriod() {
   const period = periods[periodIndex];
   periodText.innerText = `${period.start} ~ ${period.end}`;
-  cards = period.cards;
+  cards = period.cards || [];
   renderCards();
   saveData();
 }
 
-// 카드 렌더
+// 카드 렌더링
 function renderCards() {
   cardList.innerHTML = "";
 
   cards.forEach((card, index) => {
+    card.income = card.income || 0;
+    card.expense = card.expense || 0;
+    card.incomes = card.incomes || [];
+    card.expenses = card.expenses || [];
+
     const el = document.createElement("div");
     el.className = "card";
+
+    // 하이라이트 표시
+    if (deleteMode && selectedDeleteIndex === index) {
+      el.classList.add("selected");
+    } else {
+      el.classList.remove("selected");
+    }
 
     el.innerHTML = `
       <div class="card-title">${card.title}</div>
@@ -68,7 +82,30 @@ function renderCards() {
       </div>
     `;
 
-    el.onclick = () => openDetail(index);
+    el.onclick = () => {
+      if (deleteMode) {
+        // 선택 토글
+        if (selectedDeleteIndex === index) selectedDeleteIndex = null;
+        else selectedDeleteIndex = index;
+        renderCards(); // ✅ 하이라이트 즉시 표시
+
+        // confirm 삭제는 선택 후 다음 단계에서 처리
+        setTimeout(() => {
+          if (selectedDeleteIndex === index) {
+            const ok = confirm("이 카드를 삭제할까요?");
+            if (ok) {
+              cards.splice(index, 1);
+              saveData();
+            }
+            selectedDeleteIndex = null;
+            renderCards();
+          }
+        }, 0);
+      } else {
+        openDetail(index);
+      }
+    };
+
     cardList.appendChild(el);
   });
 }
@@ -80,6 +117,19 @@ addBtn.onclick = () => {
   cards.push({ title, income: 0, expense: 0, incomes: [], expenses: [] });
   saveData();
   renderCards();
+};
+
+// 삭제 버튼 토글
+deleteBtn.onclick = () => {
+  deleteMode = !deleteMode;
+  deleteBtn.style.backgroundColor = deleteMode ? "gray" : "red";
+
+  // 삭제 모드 종료 시 선택 초기화
+  if (!deleteMode) {
+    selectedDeleteIndex = null;
+    document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
+    renderCards();
+  }
 };
 
 // 상세 열기
@@ -116,19 +166,19 @@ function showTab(tab) {
   if (tab === "expense") expenseTab.classList.remove("hidden");
 }
 
-// ✅ 핵심: 요약 + 리스트 렌더
+// 요약 + 리스트 렌더
 function updateSummary() {
   const card = cards[currentIndex];
+  if (!card) return;
 
-  card.income = card.incomes.reduce((s, i) => s + i.amount, 0);
-  card.expense = card.expenses.reduce((s, i) => s + i.amount, 0);
+  card.income = (card.incomes.reduce((s, i) => s + (i.amount || 0), 0)) || 0;
+  card.expense = (card.expenses.reduce((s, i) => s + (i.amount || 0), 0)) || 0;
 
   detailIncome.innerText = card.income.toLocaleString();
   detailExpense.innerText = card.expense.toLocaleString();
   detailBalance.innerText = (card.income - card.expense).toLocaleString();
 
   // 수입
-  // 수입 렌더
   incomeList.innerHTML = "";
   card.incomes.forEach((item, i) => {
     const div = document.createElement("div");
@@ -140,18 +190,15 @@ function updateSummary() {
     </div>
     <button class="delete-btn">－</button>
   `;
-
     div.querySelector(".delete-btn").onclick = () => {
       card.incomes.splice(i, 1);
       updateSummary();
       saveData();
     };
-
     incomeList.prepend(div);
   });
 
   // 지출
-  // 지출 렌더
   expenseList.innerHTML = "";
   card.expenses.forEach((item, i) => {
     const div = document.createElement("div");
@@ -163,31 +210,29 @@ function updateSummary() {
     </div>
     <button class="delete-btn">－</button>
   `;
-
     div.querySelector(".delete-btn").onclick = () => {
       card.expenses.splice(i, 1);
       updateSummary();
       saveData();
     };
-
     expenseList.prepend(div);
   });
 }
-// ✅ 핵심 수정 ① 수입 → unshift
+
+// 수입 추가
 addIncomeBtn.onclick = () => {
   const text = incomeText.value.trim();
   const amount = Number(incomeAmount.value);
   if (!text || !amount) return;
 
-  cards[currentIndex].incomes.push({ text, amount }); // ✅ 여기서만 위로
+  cards[currentIndex].incomes.push({ text, amount });
   incomeText.value = "";
   incomeAmount.value = "";
-
   updateSummary();
   saveData();
 };
 
-// ✅ 핵심 수정 ② 지출 → unshift
+// 지출 추가
 addExpenseBtn.onclick = () => {
   const text = expenseText.value.trim();
   const amount = Number(expenseAmount.value);
@@ -196,9 +241,34 @@ addExpenseBtn.onclick = () => {
   cards[currentIndex].expenses.push({ text, amount });
   expenseText.value = "";
   expenseAmount.value = "";
-
   updateSummary();
   saveData();
+};
+
+// ← 이전 기간
+prevPeriod.onclick = () => {
+  if (periodIndex > 0) {
+    periodIndex--;
+    loadPeriod();
+  }
+};
+
+// → 다음 기간
+nextPeriod.onclick = () => {
+  if (periodIndex < periods.length - 1) {
+    periodIndex++;
+    loadPeriod();
+  }
+};
+
+// + 기간 추가
+addPeriodBtn.onclick = () => {
+  const start = prompt("기간 시작 (MM.DD)");
+  const end = prompt("기간 끝 (MM.DD)");
+  if (!start || !end) return;
+  periods.push({ start, end, cards: [] });
+  periodIndex = periods.length - 1;
+  loadPeriod();
 };
 
 loadPeriod();
