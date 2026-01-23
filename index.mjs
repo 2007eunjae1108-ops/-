@@ -124,7 +124,6 @@ deleteBtn.onclick = () => {
   deleteMode = !deleteMode;
   deleteBtn.style.backgroundColor = deleteMode ? "gray" : "red";
 
-  // 삭제 모드 종료 시 선택 초기화
   if (!deleteMode) {
     selectedDeleteIndex = null;
     document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
@@ -271,5 +270,20 @@ addPeriodBtn.onclick = () => {
   loadPeriod();
 };
 
+// ✅ 날짜 수정 후 저장
+periodText.addEventListener("blur", () => {
+  const text = periodText.innerText.trim();
+  if (/^\d{2}\.\d{2} ~ \d{2}\.\d{2}$/.test(text)) {
+    const [start, end] = text.split(" ~ ");
+    periods[periodIndex].start = start;
+    periods[periodIndex].end = end;
+    saveData();
+  } else {
+    // 형식 틀리면 이전 값으로 복원
+    periodText.innerText = `${periods[periodIndex].start} ~ ${periods[periodIndex].end}`;
+  }
+});
+
 loadPeriod();
+
 
