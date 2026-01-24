@@ -34,26 +34,51 @@ let currentIndex = null;
 let deleteMode = false;
 let selectedDeleteIndex = null;
 
-// localStorage 로드
-const saved = localStorage.getItem("periods");
-if (saved) periods = JSON.parse(saved);
-else periods = [{ start: "12.01", end: "01.19", cards: [] }];
-
-// 저장
-function saveData() {
-  localStorage.setItem("periods", JSON.stringify(periods));
+/* =========================
+   ✅ FIX 1. periods 먼저 로드
+========================= */
+const savedPeriods = localStorage.getItem("periods");
+if (savedPeriods) {
+  periods = JSON.parse(savedPeriods);
+} else {
+  periods = [{ start: "12.01", end: "01.19", cards: [] }];
 }
 
-// 현재 기간 불러오기
+/* =========================
+   ✅ FIX 2. periodIndex 로드 + 범위 보정
+========================= */
+const savedIndex = localStorage.getItem("periodIndex");
+if (savedIndex !== null) {
+  const idx = Number(savedIndex);
+  if (idx >= 0 && idx < periods.length) {
+    periodIndex = idx;
+  }
+}
+
+/* =========================
+   저장
+========================= */
+function saveData() {
+  localStorage.setItem("periods", JSON.stringify(periods));
+  localStorage.setItem("periodIndex", periodIndex); // ✅ FIX 3
+}
+
+/* =========================
+   현재 기간 로드
+========================= */
 function loadPeriod() {
   const period = periods[periodIndex];
+  if (!period) return; // 안전장치
+
   periodText.innerText = `${period.start} ~ ${period.end}`;
   cards = period.cards || [];
   renderCards();
   saveData();
 }
 
-// 카드 렌더링
+/* =========================
+   카드 렌더링
+========================= */
 function renderCards() {
   cardList.innerHTML = "";
 
@@ -66,11 +91,8 @@ function renderCards() {
     const el = document.createElement("div");
     el.className = "card";
 
-    // 하이라이트 표시
     if (deleteMode && selectedDeleteIndex === index) {
       el.classList.add("selected");
-    } else {
-      el.classList.remove("selected");
     }
 
     el.innerHTML = `
@@ -84,16 +106,13 @@ function renderCards() {
 
     el.onclick = () => {
       if (deleteMode) {
-        // 선택 토글
-        if (selectedDeleteIndex === index) selectedDeleteIndex = null;
-        else selectedDeleteIndex = index;
-        renderCards(); // ✅ 하이라이트 즉시 표시
+        selectedDeleteIndex =
+          selectedDeleteIndex === index ? null : index;
+        renderCards();
 
-        // confirm 삭제는 선택 후 다음 단계에서 처리
         setTimeout(() => {
           if (selectedDeleteIndex === index) {
-            const ok = confirm("이 카드를 삭제할까요?");
-            if (ok) {
+            if (confirm("이 카드를 삭제할까요?")) {
               cards.splice(index, 1);
               saveData();
             }
@@ -110,7 +129,9 @@ function renderCards() {
   });
 }
 
-// 카드 추가
+/* =========================
+   카드 추가
+========================= */
 addBtn.onclick = () => {
   const title = prompt("카드 제목 입력");
   if (!title) return;
@@ -119,19 +140,19 @@ addBtn.onclick = () => {
   renderCards();
 };
 
-// 삭제 버튼 토글
+/* =========================
+   삭제 모드
+========================= */
 deleteBtn.onclick = () => {
   deleteMode = !deleteMode;
   deleteBtn.style.backgroundColor = deleteMode ? "gray" : "red";
-
-  if (!deleteMode) {
-    selectedDeleteIndex = null;
-    document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
-    renderCards();
-  }
+  selectedDeleteIndex = null;
+  renderCards();
 };
 
-// 상세 열기
+/* =========================
+   상세 화면
+========================= */
 function openDetail(index) {
   currentIndex = index;
   detailTitle.innerText = cards[index].title;
@@ -141,19 +162,20 @@ function openDetail(index) {
   updateSummary();
 }
 
-// 뒤로가기
 backBtn.onclick = () => {
   detail.classList.remove("show");
   setTimeout(() => detail.classList.add("hidden"), 300);
 };
 
-// 탭
-tabBtns.forEach((btn) => {
+/* =========================
+   탭
+========================= */
+tabBtns.forEach(btn => {
   btn.onclick = () => showTab(btn.dataset.tab);
 });
 
 function showTab(tab) {
-  tabBtns.forEach((b) => b.classList.remove("active"));
+  tabBtns.forEach(b => b.classList.remove("active"));
   document.querySelector(`.tab[data-tab="${tab}"]`).classList.add("active");
 
   summaryTab.classList.add("hidden");
@@ -165,30 +187,31 @@ function showTab(tab) {
   if (tab === "expense") expenseTab.classList.remove("hidden");
 }
 
-// 요약 + 리스트 렌더
+/* =========================
+   요약
+========================= */
 function updateSummary() {
   const card = cards[currentIndex];
   if (!card) return;
 
-  card.income = (card.incomes.reduce((s, i) => s + (i.amount || 0), 0)) || 0;
-  card.expense = (card.expenses.reduce((s, i) => s + (i.amount || 0), 0)) || 0;
+  card.income = card.incomes.reduce((s, i) => s + (i.amount || 0), 0);
+  card.expense = card.expenses.reduce((s, i) => s + (i.amount || 0), 0);
 
   detailIncome.innerText = card.income.toLocaleString();
   detailExpense.innerText = card.expense.toLocaleString();
   detailBalance.innerText = (card.income - card.expense).toLocaleString();
 
-  // 수입
   incomeList.innerHTML = "";
   card.incomes.forEach((item, i) => {
     const div = document.createElement("div");
     div.className = "list-item";
     div.innerHTML = `
-    <div class="item-left">
-      <div class="item-text">${item.text}</div>
-      <div class="item-amount">${item.amount.toLocaleString()}원</div>
-    </div>
-    <button class="delete-btn">－</button>
-  `;
+      <div class="item-left">
+        <div class="item-text">${item.text}</div>
+        <div class="item-amount">${item.amount.toLocaleString()}원</div>
+      </div>
+      <button class="delete-btn">－</button>
+    `;
     div.querySelector(".delete-btn").onclick = () => {
       card.incomes.splice(i, 1);
       updateSummary();
@@ -197,18 +220,17 @@ function updateSummary() {
     incomeList.prepend(div);
   });
 
-  // 지출
   expenseList.innerHTML = "";
   card.expenses.forEach((item, i) => {
     const div = document.createElement("div");
     div.className = "list-item";
     div.innerHTML = `
-    <div class="item-left">
-      <div class="item-text">${item.text}</div>
-      <div class="item-amount">${item.amount.toLocaleString()}원</div>
-    </div>
-    <button class="delete-btn">－</button>
-  `;
+      <div class="item-left">
+        <div class="item-text">${item.text}</div>
+        <div class="item-amount">${item.amount.toLocaleString()}원</div>
+      </div>
+      <button class="delete-btn">－</button>
+    `;
     div.querySelector(".delete-btn").onclick = () => {
       card.expenses.splice(i, 1);
       updateSummary();
@@ -218,12 +240,13 @@ function updateSummary() {
   });
 }
 
-// 수입 추가
+/* =========================
+   수입 / 지출 추가
+========================= */
 addIncomeBtn.onclick = () => {
   const text = incomeText.value.trim();
   const amount = Number(incomeAmount.value);
   if (!text || !amount) return;
-
   cards[currentIndex].incomes.push({ text, amount });
   incomeText.value = "";
   incomeAmount.value = "";
@@ -231,12 +254,10 @@ addIncomeBtn.onclick = () => {
   saveData();
 };
 
-// 지출 추가
 addExpenseBtn.onclick = () => {
   const text = expenseText.value.trim();
   const amount = Number(expenseAmount.value);
   if (!text || !amount) return;
-
   cards[currentIndex].expenses.push({ text, amount });
   expenseText.value = "";
   expenseAmount.value = "";
@@ -244,7 +265,9 @@ addExpenseBtn.onclick = () => {
   saveData();
 };
 
-// ← 이전 기간
+/* =========================
+   기간 이동
+========================= */
 prevPeriod.onclick = () => {
   if (periodIndex > 0) {
     periodIndex--;
@@ -252,7 +275,6 @@ prevPeriod.onclick = () => {
   }
 };
 
-// → 다음 기간
 nextPeriod.onclick = () => {
   if (periodIndex < periods.length - 1) {
     periodIndex++;
@@ -260,7 +282,6 @@ nextPeriod.onclick = () => {
   }
 };
 
-// + 기간 추가
 addPeriodBtn.onclick = () => {
   const start = prompt("기간 시작 (MM.DD)");
   const end = prompt("기간 끝 (MM.DD)");
@@ -270,7 +291,9 @@ addPeriodBtn.onclick = () => {
   loadPeriod();
 };
 
-// ✅ 날짜 수정 후 저장
+/* =========================
+   날짜 수정
+========================= */
 periodText.addEventListener("blur", () => {
   const text = periodText.innerText.trim();
   if (/^\d{2}\.\d{2} ~ \d{2}\.\d{2}$/.test(text)) {
@@ -279,11 +302,11 @@ periodText.addEventListener("blur", () => {
     periods[periodIndex].end = end;
     saveData();
   } else {
-    // 형식 틀리면 이전 값으로 복원
     periodText.innerText = `${periods[periodIndex].start} ~ ${periods[periodIndex].end}`;
   }
 });
 
+/* =========================
+   최초 로드
+========================= */
 loadPeriod();
-
-
