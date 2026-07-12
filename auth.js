@@ -1,7 +1,7 @@
 import {
   auth,
   provider
-} from "./firebase.js";
+} from "./firebase.js?v=2";
 
 import {
   signInWithPopup,
