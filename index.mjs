@@ -1,3 +1,4 @@
+alert("index 실행됨");
 import {
   login,
   observeAuth
