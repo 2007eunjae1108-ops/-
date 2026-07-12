@@ -1,8 +1,8 @@
-alert("index 실행됨");
 import {
   login,
   observeAuth
 } from "./auth.js";
+alert("index 실행됨");
 const cardList = document.getElementById("cardList");
 const addBtn = document.getElementById("addBtn");
 const deleteBtn = document.getElementById("deleteBtn");
