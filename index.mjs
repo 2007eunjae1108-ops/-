@@ -1,7 +1,6 @@
 import { auth, provider, db } from "./firebase.js";
 import {
   login,
-  checkRedirectResult,
   observeAuth
 } from "./auth.js";
 const cardList = document.getElementById("cardList");
@@ -318,7 +317,6 @@ periodText.addEventListener("blur", () => {
 /* =========================
    최초 로드
 ========================= */
-await checkRedirectResult();
 
 googleLoginBtn.onclick = () => login();
 
