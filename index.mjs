@@ -46,36 +46,45 @@ let cards = [];
 let currentIndex = null;
 let deleteMode = false;
 let selectedDeleteIndex = null;
+let currentUid = null;
 
 /* =========================
-   ✅ FIX 1. periods 먼저 로드
-========================= */
-const savedPeriods = localStorage.getItem("periods");
-if (savedPeriods) {
-  periods = JSON.parse(savedPeriods);
-} else {
-  periods = [{ start: "12.01", end: "01.19", cards: [] }];
-}
-
 /* =========================
-   ✅ FIX 2. periodIndex 로드 + 범위 보정
+   저장 (Firestore)
 ========================= */
-const savedIndex = localStorage.getItem("periodIndex");
-if (savedIndex !== null) {
-  const idx = Number(savedIndex);
-  if (idx >= 0 && idx < periods.length) {
-    periodIndex = idx;
+async function saveData() {
+  if (!currentUid) return;
+  try {
+    await setDoc(doc(db, "users", currentUid), {
+      periods,
+      periodIndex
+    });
+  } catch (e) {
+    console.error("저장 실패:", e);
   }
 }
-
 /* =========================
-   저장
+   ✅ 로그인한 사용자 데이터 불러오기 (Firestore)
 ========================= */
-function saveData() {
-  localStorage.setItem("periods", JSON.stringify(periods));
-  localStorage.setItem("periodIndex", periodIndex); // ✅ FIX 3
+async function loadUserData(uid) {
+  currentUid = uid;
+  try {
+    const snap = await getDoc(doc(db, "users", uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      periods = data.periods || [{ start: "12.01", end: "01.19", cards: [] }];
+      periodIndex = data.periodIndex || 0;
+      if (periodIndex < 0 || periodIndex >= periods.length) periodIndex = 0;
+    } else {
+      periods = [{ start: "12.01", end: "01.19", cards: [] }];
+      periodIndex = 0;
+      await saveData();
+    }
+    loadPeriod();
+  } catch (e) {
+    console.error("불러오기 실패:", e);
+  }
 }
-
 /* =========================
    현재 기간 로드
 ========================= */
@@ -331,9 +340,11 @@ observeAuth((user) => {
   if (user) {
     loginScreen.style.display = "none";
     app.style.display = "block";
-    loadPeriod();
+    loadUserData(user.uid);
   } else {
     loginScreen.style.display = "flex";
     app.style.display = "none";
+    currentUid = null;
   }
 });
+
