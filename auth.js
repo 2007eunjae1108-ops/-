@@ -10,9 +10,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 // 로그인
 export async function login() {
-  await signInWithPopup(auth, provider);
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    alert(e.code + "\n\n" + e.message);
+  }
 }
-
 // 로그인 상태 확인
 export function observeAuth(callback) {
   onAuthStateChanged(auth, (user) => {
