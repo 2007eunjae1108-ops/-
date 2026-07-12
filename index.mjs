@@ -317,7 +317,10 @@ periodText.addEventListener("blur", () => {
    최초 로드
 ========================= */
 
-googleLoginBtn.onclick = () => login();
+googleLoginBtn.onclick = () => {
+  alert("눌림");
+  login();
+};
 
 observeAuth((user) => {
   if (user) {
