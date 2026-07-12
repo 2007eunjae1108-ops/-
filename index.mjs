@@ -76,8 +76,18 @@ async function loadUserData(uid) {
       periodIndex = data.periodIndex || 0;
       if (periodIndex < 0 || periodIndex >= periods.length) periodIndex = 0;
     } else {
-      periods = [{ start: "12.01", end: "01.19", cards: [] }];
-      periodIndex = 0;
+      const savedPeriods = localStorage.getItem("periods");
+      const savedIndex = localStorage.getItem("periodIndex");
+
+      if (savedPeriods) {
+        periods = JSON.parse(savedPeriods);
+        periodIndex = savedIndex ? Number(savedIndex) : 0;
+        if (periodIndex < 0 || periodIndex >= periods.length) periodIndex = 0;
+      } else {
+        periods = [{ start: "12.01", end: "01.19", cards: [] }];
+        periodIndex = 0;
+      }
+
       await saveData();
     }
     loadPeriod();
