@@ -2,6 +2,12 @@ import {
   login,
   observeAuth
 } from "./auth.js?v=2";
+import { db } from "./firebase.js?v=2";
+import {
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 const cardList = document.getElementById("cardList");
 const addBtn = document.getElementById("addBtn");
 const deleteBtn = document.getElementById("deleteBtn");
