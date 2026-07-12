@@ -17,10 +17,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 export const auth = getAuth(app);
-import { setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
+// 중복 import 제거하고 그냥 바로 호출
 setPersistence(auth, browserLocalPersistence);
+
 export const provider = new GoogleAuthProvider();
 export const db = getFirestore(app);
