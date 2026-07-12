@@ -4,29 +4,27 @@ import {
 } from "./firebase.js";
 
 import {
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-export async function login() {
-  await signInWithRedirect(auth, provider);
-}
 
-export async function checkRedirectResult() {
+export async function login() {
   try {
-    await getRedirectResult(auth);
+    await signInWithPopup(auth, provider);
   } catch (e) {
     alert(e.code + "\n\n" + e.message);
   }
 }
+
 
 export function observeAuth(callback) {
   onAuthStateChanged(auth, (user) => {
     callback(user);
   });
 }
+
 
 export async function logout() {
   await signOut(auth);
