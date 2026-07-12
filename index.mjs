@@ -1,7 +1,15 @@
 import { auth, provider, db } from "./firebase.js";
+import {
+  login,
+  checkRedirectResult,
+  observeAuth
+} from "./auth.js";
 const cardList = document.getElementById("cardList");
 const addBtn = document.getElementById("addBtn");
 const deleteBtn = document.getElementById("deleteBtn");
+const loginScreen = document.getElementById("loginScreen");
+const app = document.getElementById("app");
+const googleLoginBtn = document.getElementById("googleLoginBtn");
 const periodText = document.getElementById("periodText");
 const prevPeriod = document.getElementById("prevPeriod");
 const nextPeriod = document.getElementById("nextPeriod");
@@ -310,8 +318,17 @@ periodText.addEventListener("blur", () => {
 /* =========================
    최초 로드
 ========================= */
-loadPeriod();
+await checkRedirectResult();
 
-console.log("Firebase 연결 성공!");
-console.log(auth);
-console.log(db);
+googleLoginBtn.onclick = () => login();
+
+observeAuth((user) => {
+  if (user) {
+    loginScreen.style.display = "none";
+    app.style.display = "block";
+    loadPeriod();
+  } else {
+    loginScreen.style.display = "flex";
+    app.style.display = "none";
+  }
+});
