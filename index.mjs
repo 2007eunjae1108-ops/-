@@ -2,7 +2,6 @@ import {
   login,
   observeAuth
 } from "./auth.js?v=2";
-alert("index 실행됨");
 const cardList = document.getElementById("cardList");
 const addBtn = document.getElementById("addBtn");
 const deleteBtn = document.getElementById("deleteBtn");
@@ -319,7 +318,6 @@ periodText.addEventListener("blur", () => {
 ========================= */
 
 googleLoginBtn.onclick = () => {
-  alert("눌림");
   login();
 };
 
