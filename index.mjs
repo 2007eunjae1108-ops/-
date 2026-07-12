@@ -1,3 +1,4 @@
+import { auth, provider, db } from "./firebase.js";
 const cardList = document.getElementById("cardList");
 const addBtn = document.getElementById("addBtn");
 const deleteBtn = document.getElementById("deleteBtn");
@@ -310,3 +311,7 @@ periodText.addEventListener("blur", () => {
    최초 로드
 ========================= */
 loadPeriod();
+
+console.log("Firebase 연결 성공!");
+console.log(auth);
+console.log(db);
