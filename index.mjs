@@ -1,7 +1,7 @@
 import {
   login,
   observeAuth
-} from "./auth.js";
+} from "./auth.js?v=2";
 alert("index 실행됨");
 const cardList = document.getElementById("cardList");
 const addBtn = document.getElementById("addBtn");
