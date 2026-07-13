@@ -2,7 +2,7 @@ import {
   login,
   observeAuth
 } from "./auth.js?v=2";
-import { db } from "./firebase.js?v=2";
+import { db } from "./firebase.js?v=3";
 import {
   doc,
   getDoc,
