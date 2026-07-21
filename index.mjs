@@ -11,6 +11,10 @@ import {
 const cardList = document.getElementById("cardList");
 const addBtn = document.getElementById("addBtn");
 const deleteBtn = document.getElementById("deleteBtn");
+const refreshBtn = document.getElementById("refreshBtn");
+refreshBtn.onclick = () => {
+  location.reload();
+};
 const loginScreen = document.getElementById("loginScreen");
 const app = document.getElementById("app");
 const googleLoginBtn = document.getElementById("googleLoginBtn");
